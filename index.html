@@ -63,14 +63,9 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 10px rgba(139, 92, 246, 0.6), 0 0 20px rgba(139, 92, 246, 0.4), 0 0 30px rgba(124, 58, 237, 0.5);
-            transition: text-shadow 0.3s ease, transform 0.3s ease;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(124, 58, 237, 0.8);
         }
 
-            .gradient-text:hover {
-                text-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(124, 58, 237, 0.8);
-                transform: scale(1.03);
-            }
 
         /* Game Cards */
         .game-card {
@@ -489,6 +484,42 @@
                     padding: 0.75rem;
                 }
         }
+        /* Стили для курсора */
+        .cursor-purple {
+            display: inline-block;
+            width: 3px;
+            margin-left: 2px;
+            font-weight: bold;
+            color: #8b5cf6;
+            text-shadow: 0 0 8px rgba(139, 92, 246, 0.8);
+            animation: blink 1s step-end infinite;
+        }
+
+        /* Ключевые кадры для мерцания - полное появление/исчезновение */
+        @keyframes blink {
+            0%, 50% {
+                visibility: visible;
+            }
+
+            50.1%, 100% {
+                visibility: hidden;
+            }
+        }
+
+        /* Адаптив для мобильных */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+
+            .cursor-purple {
+                font-size: 2.5rem;
+            }
+
+            #dynamic-word {
+                font-size: 2.5rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-black">
@@ -549,9 +580,14 @@
 
     <!-- Hero Section -->
     <section class="relative min-h-screen flex items-center justify-center pt-16 pb-20 px-4">
-        <div class="absolute inset-0 bg-gradient-to-b from-black/0 via-purple-900/5 to-black/0 z-10"></div>
         <div class="container mx-auto relative z-20 text-center px-4">
-            <h1 class="hero-title text-5xl md:text-7xl font-bold mb-6 gradient-text leading-tight" data-i18n="hero.title">WE CREATE INDIE PRODUCTS</h1>
+            <h1 class="hero-title text-5xl md:text-7xl font-bold mb-6 gradient-text leading-tight">
+                WE CREATE INDIE
+                <span class="inline-block">
+                    <span id="dynamic-word" class="gradient-text"></span>
+                    <span class="cursor-purple">|</span>
+                </span>
+            </h1>
             <p class="hero-subtitle text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8" data-i18n="hero.subtitle">Digital site about the digital world.</p>
             <div class="flex flex-wrap justify-center gap-4 md:gap-6 mt-8">
                 <div class="glass p-4 md:p-6 rounded-xl w-24 md:w-32 text-center backdrop-blur-xl transition-all duration-300 hover:scale-105 glow-purple-light">
@@ -891,7 +927,7 @@
         // Translation data
         const translations = {
             ru: {
-                "hero.title": "WE CREATE INDIE PRODUCTS",
+                "hero.title": "WE CREATE INDIE",
                 "hero.subtitle": "Цифровой сайт о цифровом мире",
                 "hero.games": "7 Игр",
                 "hero.players": "5K+ Игроков",
@@ -941,7 +977,7 @@
                 "footer.copyright": "© 2026 SafePlace. Все права защищены"
             },
             en: {
-                "hero.title": "WE CREATE INDIE PRODUCTS",
+                "hero.title": "WE CREATE INDIE",
                 "hero.subtitle": "Digital site about the digital world",
                 "hero.games": "7 Games",
                 "hero.players": "5K+ Players",
@@ -1068,6 +1104,56 @@
                 el.style.animation = 'none';
             });
         }
+    </script>
+    <script>
+        // Эффект печатной машинки
+        (function () {
+            const words = ["PRODUCTS", "GAMES", "SITES", "PROJECTS", "TOOLS", "APPS", "SERVICES", "PLATFORMS"];
+            let wordIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+            const dynamicElement = document.getElementById("dynamic-word");
+
+            const TYPE_SPEED = 100;        // скорость печати
+            const DELETE_SPEED = 50;       // скорость стирания
+            const PAUSE_BEFORE_DELETE = 1500;  // пауза после полного слова
+            const PAUSE_BEFORE_NEXT = 500;     // пауза перед новым словом
+
+            function typeEffect() {
+                const currentWord = words[wordIndex];
+
+                if (isDeleting) {
+                    dynamicElement.textContent = currentWord.substring(0, charIndex - 1);
+                    charIndex--;
+                } else {
+                    dynamicElement.textContent = currentWord.substring(0, charIndex + 1);
+                    charIndex++;
+                }
+
+                if (!isDeleting && charIndex === currentWord.length) {
+                    isDeleting = true;
+                    setTimeout(typeEffect, PAUSE_BEFORE_DELETE);
+                    return;
+                }
+
+                if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    wordIndex = (wordIndex + 1) % words.length;
+                    setTimeout(typeEffect, PAUSE_BEFORE_NEXT);
+                    return;
+                }
+
+                const speed = isDeleting ? DELETE_SPEED : TYPE_SPEED;
+                setTimeout(typeEffect, speed);
+            }
+
+            // Запускаем, когда страница загрузится
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', typeEffect);
+            } else {
+                typeEffect();
+            }
+        })();
     </script>
 </body>
 </html>
