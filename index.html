@@ -342,6 +342,89 @@
             box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
         }
 
+        
+
+        .game-card {
+            overflow: visible;
+            isolation: isolate;
+        }
+
+        .game-expand {
+            position: absolute;
+            top: 0.75rem;
+            bottom: 0.75rem;
+            left: 50%;
+            width: min(760px, calc(100vw - 2rem));
+            transform: translateX(-50%) scaleX(0.72);
+            transform-origin: center;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 20;
+            border-radius: 22px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+            border: 1px solid rgba(255,255,255,0.28);
+            backdrop-filter: blur(24px) saturate(170%);
+            -webkit-backdrop-filter: blur(24px) saturate(170%);
+            box-shadow: 0 20px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.24);
+            transition: transform 0.45s cubic-bezier(.2,.8,.2,1), opacity .35s ease;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 1rem;
+        }
+
+        .game-card:hover {
+            z-index: 30;
+        }
+
+        .game-card:hover .game-expand,
+        .game-card.expanded .game-expand {
+            opacity: 1;
+            transform: translateX(-50%) scaleX(1);
+            pointer-events: auto;
+        }
+
+        .game-expand-media img {
+            border-radius: 14px;
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .game-expand-thumbs {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: .55rem;
+            margin-top: .55rem;
+        }
+
+        .game-trailer-btn {
+            margin-top: .75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .55rem .9rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.26);
+            background: rgba(123, 92, 246, 0.28);
+        }
+
+        @media (max-width: 1024px) {
+            .game-expand {
+                position: static;
+                width: 100%;
+                margin-top: .7rem;
+                transform: scale(1);
+                opacity: 1;
+                pointer-events: auto;
+                display: none;
+                grid-template-columns: 1fr;
+            }
+
+            .game-card.expanded .game-expand { display: grid; }
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 1024px) {
             .hero-title {
@@ -927,6 +1010,50 @@
             });
         });
 
+        
+        const gameShowcaseData = {
+            "Drone Delivery": { trailer: "https://www.youtube.com/@Safe--Place", descRu: "Аркадный симулятор доставки с ветром, таймингом и риском крушения.", descEn: "Arcade drone delivery with wind, timing and risky landings." },
+            "LightUP": { trailer: "https://www.youtube.com/@Safe--Place", descRu: "Неоновая головоломка с цепочками света и атмосферным саундом.", descEn: "Neon puzzle with light chains and atmospheric sound." },
+            "Rocket Simulator": { trailer: "https://www.youtube.com/@Safe--Place", descRu: "Конструктор ракет + полёты через метеоритные поля.", descEn: "Build rockets and fly through meteor fields." }
+        };
+
+        document.querySelectorAll('.game-card:not(.coming-soon)').forEach((card) => {
+            const title = card.querySelector('h3')?.textContent?.trim() || 'Game';
+            const image = card.querySelector('.game-image')?.getAttribute('src') || '';
+            const data = gameShowcaseData[title] || { trailer: 'https://www.youtube.com/@Safe--Place', descRu: 'Подробности, скриншоты и трейлер доступны в расширенной карточке.', descEn: 'Details, screenshots and trailer are available in expanded view.' };
+
+            const panel = document.createElement('div');
+            panel.className = 'game-expand';
+            panel.innerHTML = `
+                <div class="game-expand-media">
+                    <img src="${image}" alt="${title} screenshot 1">
+                    <div class="game-expand-thumbs">
+                        <img src="${image}" alt="${title} screenshot 2">
+                        <img src="${image}" alt="${title} screenshot 3">
+                    </div>
+                </div>
+                <div>
+                    <div class="text-xl font-bold mb-2">${title}</div>
+                    <p class="text-sm text-white/90 mb-2" data-expand-desc-ru>${data.descRu}</p>
+                    <p class="text-sm text-white/90 mb-2 hidden" data-expand-desc-en>${data.descEn}</p>
+                    <ul class="text-xs text-white/80 space-y-1">
+                        <li>• Liquid Glass UI with depth blur</li>
+                        <li>• Интерактивная карточка с раскрытием в стороны</li>
+                        <li>• Быстрый доступ к трейлеру и галерее</li>
+                    </ul>
+                    <a class="game-trailer-btn" href="${data.trailer}" target="_blank" rel="noopener"><i class="fas fa-play"></i><span data-i18n="games.watch_trailer">Смотреть трейлер</span></a>
+                </div>
+            `;
+            card.appendChild(panel);
+
+            card.addEventListener('click', (e) => {
+                if (window.innerWidth <= 1024 && !e.target.closest('a')) {
+                    card.classList.toggle('expanded');
+                }
+            });
+        });
+
+
         // Translation data
         const translations = {
             ru: {
@@ -942,6 +1069,7 @@
                 "games.play": "Играть",
                 "games.visit": "Посетить",
                 "games.download": "Скачать",
+                "games.watch_trailer": "Смотреть трейлер",
                 "games.in_development": "В разработке",
                 "games.progress": "Прогресс разработки",
                 "games.game9.coming": "Релиз в ???? году",
@@ -993,6 +1121,7 @@
                 "games.play": "Play Now",
                 "games.visit": "Visit Now",
                 "games.download": "Download Now",
+                "games.watch_trailer": "Watch trailer",
                 "games.in_development": "In Development",
                 "games.progress": "Development Progress",
                 "games.game9.coming": "Coming ????",
